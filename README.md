@@ -1,20 +1,19 @@
-# Project template for [gulp.js](http://gulpjs.com/)
-<img width="114px" height="257px" align="right" src="https://raw.githubusercontent.com/gulpjs/artwork/master/gulp-2x.png"/>
+# Webpack template with [React](https://facebook.github.io/react/) and [React Hot Loader](http://gaearon.github.io/react-hot-loader/)
+
+<img width="350px" align="right" src="https://camo.githubusercontent.com/66747a6e05a799aec9c6e04a3e721ca567748e8b/68747470733a2f2f662e636c6f75642e6769746875622e636f6d2f6173736574732f313336353838312f313931383337332f32653035373166612d376462632d313165332d383436352d3839356632393164343366652e706e67"/>
 
 [ ![Codeship Status for leonidas/gulp-project-template](https://codeship.com/projects/07620890-e45d-0132-b176-5e88bc3b0df8/status?branch=master)](https://codeship.com/projects/81833)
 
 ### What it does
-* [Jade](http://jade-lang.com) files to HTML
 * [Stylus](http://learnboost.github.io/stylus) files to CSS
-* [ES6+ JavaScript](https://babeljs.io) files to ES5 Javascript through [browserify](http://browserify.org/)
-    * You are able to use `import` in your client-side code
-* Uses [BrowserSync](http://www.browsersync.io/) to serve your static files to localhost:9001 and to automatically reload your browser when files change.
+* [ES6+ JavaScript](https://babeljs.io) files to ES5 Javascript
+* Hot swaps your React components
 
 ## Getting things up and running
 - Install [Node.js](http://nodejs.org)
 
 ```
- git clone git@github.com:leonidas/gulp-project-template.git <your project name>
+ git clone git@github.com:rikukissa/webpack-template.git <your project name>
  cd <your project name>
  npm install
  npm start
@@ -36,15 +35,25 @@ Minification, uglification and other tasks you're expected to run before deployi
 
 ## Development guidelines
 #### Directory structure
+```
+src/
+  index.js  -- Main entrypoint
+  components/  --  All components
+    button/
+      index.js  --  Component definition (and styles)
+      index.styl  --  Styles if you wish to keep them in a separate file
+      __tests__/  --  All tests suites for this component
+        index.js
+  utils/
+    some-util.js
+test/  --  Test helpers
 
-**public** - directory should be dedicated only to compiled/copied files from **src** - directory.
-  It should be possible to delete directory completely and after **npm start** or **npm run build** everything should be as they were before the deletion.
-
+```
 #### Dependencies
 All dependencies are meant to be installed with **npm**.
-* JavaScript-files from **node_modules** can be *require()*'d in client-side modules.
-* CSS files can be [imported](https://learnboost.github.io/stylus/docs/import.html) from **node_modules** using relative path from the stylus file to the css file e.g `@import '../../node_modules/bootstrap/dist/css/bootstrap.css'`
-* You can either create a new gulp task for copying other assets from directories mentioned above or use an array as a value for [assets sources](https://github.com/leonidas/gulp-project-template/blob/master/gulpfile.js#L38) e.g `source: ['./src/assets/**/*.*', 'node_modules/bootstrap/fonts*/*.*']` *(notice the asterisk after 'fonts'? It makes gulp copy the whole directory instead of just the files inside of it)*
+* JavaScript-files from **node_modules** can be *importer* in client-side modules.
+* CSS files can be [imported](https://learnboost.github.io/stylus/docs/import.html) from **node_modules** using relative path from the stylus file to the css file e.g `@import '~/bootstrap/dist/css/bootstrap.css'`
+
 
 ## Suggested development tools
 
@@ -55,10 +64,5 @@ All dependencies are meant to be installed with **npm**.
 
 ## FAQ
 
-### I want to use CoffeeScript instead of JavaScript
-Check out the [coffee branch](https://github.com/leonidas/gulp-project-template/tree/coffee)
-
 ## Useful resources
-* [Browserify handbook](https://github.com/substack/browserify-handbook)
-  * [avoiding ../../../../../../..](https://github.com/substack/browserify-handbook#avoiding-)
 * [MindBEMding – getting your head ’round BEM syntax](http://csswizardry.com/2013/01/mindbemding-getting-your-head-round-bem-syntax/)
