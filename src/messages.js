@@ -1,9 +1,3 @@
-
-
-/*
- * Public API for business logic
- */
-
 import Bacon from 'baconjs';
 import {findWhere} from 'lodash';
 

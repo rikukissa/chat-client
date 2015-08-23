@@ -5,7 +5,7 @@
 import Bacon from 'baconjs';
 import {without} from 'lodash';
 import {getUserChannels, part} from 'api/channels';
-import {message$} from 'services/messages';
+import {message$} from 'messages';
 
 const createChannel$ = new Bacon.Bus();
 const removeChannel$ = new Bacon.Bus();

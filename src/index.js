@@ -1,20 +1,22 @@
-import 'inputs/chat';
-
-import React from 'react';
 import Bacon from 'baconjs';
-import App from 'components/App';
+import irc from 'io/irc/index';
+import ui from 'io/ui';
+import {getChannels} from 'channels';
 
-import {toProperty as messagesProperty} from 'services/messages';
-import {toProperty as channelsProperty, currentChannel$} from 'services/channels';
+import {toProperty as messagesProperty} from 'messages';
+import {toProperty as channelsProperty, currentChannel$} from 'channels';
 
 const channels$ = channelsProperty([]);
 
-const appState = Bacon.combineTemplate({
+const appState$ = Bacon.combineTemplate({
   channels: channels$,
   messages: messagesProperty([], channels$, currentChannel$),
   currentChannel: currentChannel$
 });
 
-appState.onValue((state) => {
-  React.render(<App {...state} />, document.body);
-});
+// IO initialization
+irc(appState$);
+ui(appState$);
+
+// Fetch initial datae
+getChannels();

@@ -1,4 +1,4 @@
-import {addMessage} from 'services/messages';
+import {addMessage} from 'messages';
 import Chance from 'chance';
 import {CHANNELS} from 'api/channels';
 

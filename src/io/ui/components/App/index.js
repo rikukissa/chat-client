@@ -1,17 +1,14 @@
 import React from 'react';
 import './index.styl';
 
-import {sendMessage} from 'services/messages';
-import {getChannels, selectChannel, partChannel} from 'services/channels';
+import {sendMessage} from 'messages';
+import {getChannels, selectChannel, partChannel} from 'channels';
 
-import MessageInput from 'components/MessageInput';
-import MessageBox from 'components/MessageBox';
-import ChannelList from 'components/ChannelList';
+import MessageInput from 'io/ui/components/MessageInput';
+import MessageBox from 'io/ui/components/MessageBox';
+import ChannelList from 'io/ui/components/ChannelList';
 
 const App = React.createClass({
-  componentDidMount() {
-    getChannels();
-  },
   render() {
     const messages = !this.props.currentChannel ? [] :
       this.props.messages.filter(m => m.channel === this.props.currentChannel.name);
