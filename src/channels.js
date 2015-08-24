@@ -4,13 +4,23 @@
 
 import Bacon from 'baconjs';
 import {without} from 'lodash';
-import {getUserChannels, part} from 'api/channels';
-import {message$} from 'messages';
 
-const createChannel$ = new Bacon.Bus();
+/*
+ * Outgoing
+ */
+
+export const getChannels$ = new Bacon.Bus();
+export const part$ = new Bacon.Bus();
+
+/*
+ * Incoming
+ */
+
 const removeChannel$ = new Bacon.Bus();
 const restoreChannel$ = new Bacon.Bus();
-const createdChannel$ = createChannel$.map(name => ({
+const addChannel$ = new Bacon.Bus();
+
+export const createChannel$ = addChannel$.map(name => ({
   name,
   unread: 0,
   notifications: {
@@ -19,83 +29,37 @@ const createdChannel$ = createChannel$.map(name => ({
   }
 }));
 
-const currentChannelBus$ = new Bacon.Bus();
-
 /*
  * Public store API
  */
 
-export const currentChannel$ = Bacon.update(null,
-  [currentChannelBus$], (state, channel) => channel,
-  [createdChannel$], (state, channel) => {
-    return state || channel;
-  }
+export const channels$ = Bacon.update([],
+  [createChannel$.merge(restoreChannel$)], create,
+  [removeChannel$], remove
 );
 
-export function toProperty(initial) {
-  return Bacon.update(initial,
-    [createdChannel$.merge(restoreChannel$)], createChannel,
-    [message$, currentChannel$], notifyChannels,
-    [currentChannelBus$], removeChannelNotifications,
-    [removeChannel$], removeChannel
-  );
-}
-
-function createChannel(channels, channel) {
+function create(channels, channel) {
   return channels.concat(channel);
 }
 
-function removeChannel(channels, channel) {
+function remove(channels, channel) {
   return without(channels, channel);
 }
 
-function notifyChannels(channels, message, currentChannel) {
-  return channels.map((channel) => {
-    if(channel.name !== message.channel || channel === currentChannel) {
-      return channel;
-    }
-
-    channel.unread++;
-    channel.notifications.message = true;
-    return channel;
-  });
-}
-
-
-function removeChannelNotifications(channels, currentChannel) {
-  return channels.map((channel) => {
-    if(channel.name !== currentChannel.name) {
-      return channel;
-    }
-
-    channel.unread = 0;
-    channel.notifications.message = false;
-    channel.notifications.join = false;
-    return channel;
-  });
-}
-
-
 /*
- * Public API
+ * Public API used by IOs
  */
 
 export function partChannel(channel) {
-  removeChannel$.push(channel);
-
-  Bacon
-    .fromPromise(part(channel.name))
-    .onError(() => restoreChannel$.push(channel));
+  // Optimistic removal
+  removeChannel$.push(channel.name);
+  part$.push(channel.name);
 }
 
-export function selectChannel(channel) {
-  currentChannelBus$.push(channel);
+export function createChannel(name) {
+  addChannel$.push(name);
 }
 
 export function getChannels() {
-  const newChannels$ = Bacon
-    .fromPromise(getUserChannels())
-    .flatMap(Bacon.fromArray);
-
-  createChannel$.plug(newChannels$);
+  getChannels$.push();
 }

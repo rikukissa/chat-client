@@ -2,7 +2,8 @@ import React from 'react';
 import './index.styl';
 
 import {sendMessage} from 'messages';
-import {getChannels, selectChannel, partChannel} from 'channels';
+import {partChannel} from 'channels';
+import {selectChannel} from 'current-channel';
 
 import MessageInput from 'io/ui/components/MessageInput';
 import MessageBox from 'io/ui/components/MessageBox';
@@ -19,6 +20,7 @@ const App = React.createClass({
           onPart={partChannel}
           onSelect={selectChannel}
           channels={this.props.channels}
+          notifications={this.props.notifications}
           currentChannel={this.props.currentChannel} />
         <div className='chat__container'>
           <MessageBox messages={messages} />

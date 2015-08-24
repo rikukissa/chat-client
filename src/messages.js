@@ -1,47 +1,53 @@
 import Bacon from 'baconjs';
-import {findWhere} from 'lodash';
+import {currentChannel$} from 'current-channel';
+/*
+ * Outgoing
+ */
 
-const create$ = new Bacon.Bus();
+export const sendMessage$ = new Bacon.Bus();
 
+/*
+ * Incoming
+ */
+
+const addMessage$ = new Bacon.Bus();
+
+/*
+ * Outgoing events
+ */
+
+export const message$ = addMessage$;
 
 /*
  * Public store API
  */
 
-export const message$ = create$;
+export const messages$ = Bacon.update([],
+  [addMessage$], create
+);
 
-export function toProperty(initial, channels$, currentChannel$) {
-  return Bacon.update(initial,
-    [create$, channels$, currentChannel$], create
-  );
-}
-
-function create(messages, message, channels, currentChannel) {
+function create(messages, message) {
   const msg = {
     ...message,
-    received: Date.now(),
-    channel: message.channel || currentChannel.name
+    received: Date.now()
   };
 
-  if(findWhere(channels, {name: msg.channel})) {
-    return messages.concat(msg);
-  }
-  return messages;
+  return messages.concat(msg);
 }
-
 
 /*
  * Public API
  */
 
 export function sendMessage(body) {
-  create$.push({
+  currentChannel$.sampledBy(Bacon.once()).map(channel => ({
+    channel: channel.name,
     body,
     nick: 'Riku'
-  });
+  })).onValue(::sendMessage$.push);
 }
 
 export function addMessage(message) {
-  create$.push(message);
+  addMessage$.push(message);
 }
 
