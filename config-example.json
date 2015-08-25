@@ -1,0 +1,9 @@
+{
+  "irc": {
+    "server": "irc.quakenet.org",
+    "nick": "riku",
+    "port": 6667,
+    "username": "some-username",
+    "password": "super-secret-password"
+  }
+}

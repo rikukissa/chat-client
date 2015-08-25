@@ -27,10 +27,17 @@ if(!production) {
 module.exports = {
   devtool: 'inline-source-map',
   entry: entries,
+  externals: [{
+    irc: 'commonjs irc'
+  }],
   output: {
-    path: path.join(__dirname, 'build'),
+    path: path.join(__dirname, './public/built'),
     filename: 'bundle.js',
-    publicPath: '/dist/'
+    publicPath: 'http://localhost:9001/built/'
+  },
+  devServer: {
+    contentBase: './public',
+    publicPath: 'http://localhost:9001/built/'
   },
   plugins: plugins,
   resolve: {
@@ -46,7 +53,11 @@ module.exports = {
       },
       {
         test: /\.styl$/,
-        loaders: ['style', 'css', 'stylus']
+        loaders: ['style', 'css', 'autoprefixer?browsers=last 2 versions', 'stylus']
+      },
+      {
+        test: /\.json$/,
+        loaders: ['json']
       }
     ]
   }

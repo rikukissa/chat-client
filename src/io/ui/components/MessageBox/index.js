@@ -1,41 +1,84 @@
 import React from 'react';
 import timeago from 'timeago';
+import Message from 'io/ui/components/Message';
+import moment from 'moment';
 
-export default class MessageList extends React.Component {
+import './index.styl';
+
+export default class MessageBox extends React.Component {
   componentWillUpdate() {
-    var node = React.findDOMNode(this.refs.messages);
+    const node = React.findDOMNode(this.refs.messages);
     this.shouldScrollBottom = node.scrollTop + node.offsetHeight === node.scrollHeight;
   }
   componentDidUpdate() {
     if(!this.shouldScrollBottom) {
       return;
     }
-    var node = React.findDOMNode(this.refs.messages);
+    const node = React.findDOMNode(this.refs.messages);
     node.scrollTop = node.scrollHeight;
   }
   render() {
+
+    const messageGroups = this.props.messages.reduce((memo, message) => {
+
+      const latestGroup = memo[memo.length - 1];
+
+      const latestNick = latestGroup && latestGroup[latestGroup.length - 1].nick;
+
+      if(memo.length === 0 || latestNick !== message.nick) {
+        memo.push([message]);
+      } else {
+        latestGroup.push(message);
+      }
+      return memo;
+    }, []);
+
     return (
-      <div className='chat__messages' ref='messages'>
-        <ul>
+      <div className='message-box' ref='messages'>
+
         {
-          this.props.messages.map((message, i) => {
-            const prev = this.props.messages[i - 1];
-            const timeAgo = timeago(message.received);
-            const timestamp = (
-              <div className='message__received'>
-                {timeago(message.received)}
+
+
+          messageGroups.map((messageGroup, i) => {
+
+
+            const prevGroup = messageGroups[i - 1];
+            const lastMessage = prevGroup && prevGroup[0];
+            const timeAgo = timeago(messageGroup[0].received);
+
+            const equalTimestrings = lastMessage &&
+              timeago(lastMessage.received) === timeAgo;
+
+            const block = equalTimestrings ? [] : [(
+              <div className='message-box__timestamp'>
+                {timeAgo}
               </div>
-            )
-            return (
-              <li key={i} className='message'>
-                {!prev || timeago(prev.received) !== timeAgo ? timestamp : null}
-                <span className='message__nick'>{message.nick}</span>
-                {message.body}
-              </li>
+            )];
+
+
+            const timestamp = moment(messageGroup[0].received).format('HH:mm a');
+
+            return block.concat(
+              <div className='message-group'>
+                <div className='message-group__header'>
+                  <span className='message-group__nick'>
+                    {messageGroup[0].nick}
+                  </span>
+                  <span className='message-group__timestamp'>
+                    {timestamp}
+                  </span>
+                </div>
+
+                {
+                  messageGroup.map((message, i) =>
+                    <Message key={i} message={message.body} />
+                  )
+                }
+              </div>
             );
           })
         }
-        </ul>
+
       </div>
     );
   }
