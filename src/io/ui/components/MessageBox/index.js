@@ -77,7 +77,7 @@ export default class MessageBox extends React.Component {
 
                 {
                   messageGroup.map((message, i) =>
-                    <Message key={i} message={message.body} />
+                    <Message key={i} message={message} />
                   )
                 }
               </div>

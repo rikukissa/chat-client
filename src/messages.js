@@ -1,4 +1,5 @@
 import Bacon from 'baconjs';
+import urlRegex from 'url-regex';
 import {currentChannel$} from 'current-channel';
 /*
  * Outgoing
@@ -48,6 +49,16 @@ export function sendMessage(body) {
 }
 
 export function addMessage(message) {
-  addMessage$.push(message);
-}
 
+  // TODO remove this
+  message.body = message.body.replace(/^\[.*\]/, '');
+
+  const urls = (message.body.match(urlRegex()) || []).map((url) => {
+    return {
+      url,
+      image: Boolean(url.match(/\.(?:jpe?g|gif|png)$/))
+    };
+  });
+
+  addMessage$.push({...message, urls});
+}
