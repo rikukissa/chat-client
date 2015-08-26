@@ -29,13 +29,16 @@ export default function init() {
 
   client.on('registered', ::console.log);
 
-  Bacon.fromEvent(client, 'join', (channel, nick) =>
+  const join$ = Bacon.fromEvent(client, 'join', (channel, nick) =>
     ({nick, channel})
-  ).filter((event) => event.nick === client.nick)
-  .map('.channel')
-  .onValue(createChannel);
+  );
 
-  Bacon.fromEvent(client, 'message', (nick, channel, body, event) => {
+  join$
+    .filter((event) => event.nick === client.nick)
+    .map('.channel')
+    .onValue(createChannel);
+
+  Bacon.fromEvent(client, 'message', (nick, channel, body) => {
     return {nick, channel, body};
   }).onValue(addMessage);
 
@@ -43,25 +46,15 @@ export default function init() {
    * Events from application
    */
 
-  sendMessage$.delay(500).onValue(addMessage);
+  sendMessage$.onValue(({channel, body, nick}) => {
+    client.say(channel, body);
+    addMessage({channel, body, nick});
+  });
 
   // getChannels$.delay(500).onValue(() => {
   //   CHANNELS.map(createChannel);
   // });
 
   part$.delay(500).onValue(removeChannel);
-
-  /*
-   * Events from data source
-   */
-
-  (function sendRandomMessage() {
-    addMessage({
-      channel: CHANNELS[Math.floor(CHANNELS.length * Math.random())],
-      nick: chance.first(),
-      body: chance.sentence()
-    });
-    setTimeout(sendRandomMessage, Math.random() * 4000);
-  })();
 }
 
