@@ -8,7 +8,7 @@ import './index.styl';
 export default class MessageBox extends React.Component {
   componentWillUpdate() {
     const node = React.findDOMNode(this.refs.messages);
-    this.shouldScrollBottom = node.scrollTop + node.offsetHeight === node.scrollHeight;
+    this.shouldScrollBottom = (node.scrollTop + node.offsetHeight) > (node.scrollHeight - 50);
   }
   componentDidUpdate() {
     if(!this.shouldScrollBottom) {
@@ -37,8 +37,6 @@ export default class MessageBox extends React.Component {
       <div className='message-box' ref='messages'>
 
         {
-
-
           messageGroups.map((messageGroup, i) => {
 
 
