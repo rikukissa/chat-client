@@ -1,0 +1,41 @@
+@import '~vars'
+
+.channels
+  width 180px
+  padding 1em 0
+  position relative
+  &:after
+    position absolute
+    right 0
+    height 95%
+    top 2.5%
+    width 1px
+    content ''
+    background rgb(230, 230, 230)
+
+
+.channel
+  font-weight 300
+  padding 2px 1em
+  padding-bottom 4px
+  margin-bottom 0.25em
+  cursor pointer
+  color #aaa
+  text-align right
+  font-family secondaryFont
+  font-size 1em
+  &:hover
+    background #F5F5F5
+    border-radius 3px
+  *
+    vertical-align middle
+  button
+    float right
+    display none
+
+.channel--is-active
+  color #333
+  font-weight 600
+
+.channel--has-alert
+  color rgb(87, 173, 104)

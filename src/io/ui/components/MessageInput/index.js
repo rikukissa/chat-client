@@ -1,4 +1,5 @@
 import React from 'react';
+import './index.styl'
 
 export default class MessageInput extends React.Component {
   onSubmit(e) {
@@ -12,8 +13,7 @@ export default class MessageInput extends React.Component {
     return (
       <form className='chat__input' onSubmit={(e) => this.onSubmit(e)}>
         <div className='chat__input-wrapper'>
-          <input ref='input' type='text' />
-          <button>Submit</button>
+          <input ref='input' placeholder='Write a message...' type='text' />
         </div>
       </form>
     );

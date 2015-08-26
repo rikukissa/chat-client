@@ -61,9 +61,15 @@ export default class MessageBox extends React.Component {
             return block.concat(
               <div className='message-group'>
                 <div className='message-group__header'>
-                  <span className='message-group__nick'>
-                    {messageGroup[0].nick}
-                  </span>
+                  {
+                    !messageGroup[0].nick ? null : (
+                      <span className='message-group__nick'>
+                        {messageGroup[0].nick}
+                      </span>
+                    )
+                  }
+
+
                   <span className='message-group__timestamp'>
                     {timestamp}
                   </span>
