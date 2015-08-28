@@ -2,6 +2,8 @@ import marked from 'marked';
 import highlight from 'highlight.js';
 import urlRegex from 'url-regex';
 import sanitizeHTML from 'sanitize-html';
+import {last} from 'lodash';
+import axios from 'axios';
 
 marked.setOptions({
   highlight: code => highlight.highlightAuto(code).value,
@@ -58,9 +60,6 @@ export function embed(text) {
     /https?:\/\/(www\.)?youtube\.com\/watch\?v=(\S+)/g,
     '<iframe id="ytplayer" type="text/html" width="640" height="390" src="http://www.youtube.com/embed/$2?autoplay=0" frameborder="0"></iframe>')
 
-  .replace(// Imgur
-    /http:\/\/imgur\.com\/gallery\/(\S+)/g,
-    `<iframe class="imgur-album" width="100%" height="550" frameborder="0" src="https://imgur.com/a/$1/embed"></iframe>`);
 }
 
 
@@ -68,4 +67,28 @@ export function nl2br(text) {
   return text.replace(/\n/g, (match, place) => {
     return place + 1 === text.length ? '' : '<br />';
   });
+}
+
+export function imgurEmbed(text) {
+  const regex = /http:\/\/imgur\.com\/gallery\/\S+/g;
+
+  const matches = text.match(regex);
+
+  if(!matches) {
+    return Promise.resolve(text);
+  }
+
+  return matches.reduce((promise, url) => {
+    const id = last(url.split('/').filter(str => str !== ''));
+
+    return promise.then((formatted) => {
+      return axios.get('https://api.imgur.com/3/gallery/' + id).then((res) => {
+        if(res.data.data.is_album) {
+          return formatted.replace(url, `<iframe class="imgur-album" width="100%" height="550" frameborder="0" src="https://imgur.com/a/${id}/embed"></iframe>`);
+        }
+        return formatted.replace(url, res.data.data.link);
+      });
+    });
+
+  }, Promise.resolve(text));
 }
