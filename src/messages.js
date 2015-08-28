@@ -1,5 +1,8 @@
 import Bacon from 'baconjs';
 import {currentChannel$} from 'current-channel';
+import PouchDB from 'pouchdb';
+
+const db = new PouchDB('messages');
 
 /*
  * Outgoing
@@ -13,28 +16,36 @@ export const sendMessage$ = new Bacon.Bus();
 
 const addMessage$ = new Bacon.Bus();
 
+const load$ = Bacon
+  .fromPromise(db.allDocs({include_docs: true}))
+  .map(res => res.rows.map(row => row.doc));
+
 /*
  * Outgoing events
  */
 
-export const message$ = addMessage$;
+export const message$ = addMessage$.map(message => ({
+  ...message,
+  id: Date.now(),
+  received: Date.now()
+}));
+
+
+message$.onValue((message) => {
+  db.post(message);
+});
 
 /*
  * Public store API
  */
 
 export const messages$ = Bacon.update([],
-  [addMessage$], create
+  [message$], create,
+  [load$], (messages, loaded) => loaded
 );
 
 function create(messages, message) {
-  const msg = {
-    ...message,
-    id: messages.length,
-    received: Date.now()
-  };
-
-  return messages.concat(msg);
+  return messages.concat(message);
 }
 
 /*

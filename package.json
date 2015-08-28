@@ -27,6 +27,7 @@
     "lodash": "^3.10.1",
     "marked": "^0.3.5",
     "moment": "^2.10.6",
+    "pouchdb": "^4.0.0",
     "ramda": "^0.17.1",
     "react": "^0.13.3",
     "react-textarea-autosize": "^2.5.1",
