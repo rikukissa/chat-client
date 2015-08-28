@@ -38,9 +38,11 @@ export default function init() {
     .map('.channel')
     .onValue(createChannel);
 
-  Bacon.fromEvent(client, 'message', (nick, channel, body) => {
-    return {nick, channel, body};
-  }).onValue(addMessage);
+  Bacon.fromEvent(client, 'message', (nick, channel, body, event) => {
+    return {nick, channel, body, prefix: event.prefix};
+  })
+  .filter(({prefix}) => prefix !== '***!znc@znc.in')
+  .onValue(addMessage);
 
   /*
    * Events from application
