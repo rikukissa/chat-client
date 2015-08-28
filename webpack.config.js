@@ -28,7 +28,8 @@ module.exports = {
   devtool: 'inline-source-map',
   entry: entries,
   externals: [{
-    irc: 'commonjs irc'
+    irc: 'commonjs irc',
+    shell: 'commonjs shell'
   }],
   output: {
     path: path.join(__dirname, './public/built'),
