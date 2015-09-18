@@ -16,13 +16,12 @@ export default class ChannelList extends React.Component {
               });
 
               const channelClasses = classNames('channel', {
-                'channel--is-active': this.props.currentChannel === channel,
+                'channel--is-active': this.props.currentChannels.indexOf(channel.name) > -1,
                 'channel--has-alert': notification && notification.alert
               });
 
-
               return (
-                <li className={channelClasses} onClick={() => this.props.onSelect(channel)} key={i}>
+                <li className={channelClasses} onClick={(e) => this.props.onSelect(e, channel)} key={i}>
                   <span className='channel__name'>{channel.name.replace('#', '')}</span>
                   <button onClick={() => this.props.onPart(channel)}>
                     X

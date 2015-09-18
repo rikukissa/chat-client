@@ -50,8 +50,8 @@ export default function init() {
    */
 
   sendMessage$.onValue(({channel, body, nick}) => {
-    client.say(channel, body);
-    addMessage({channel, body, nick});
+    client.say(channel.name, body);
+    addMessage({channel: channel.name, body, nick});
   });
 
   join$.onValue(::client.join);

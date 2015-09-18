@@ -5,13 +5,13 @@ import {getChannels} from 'channels';
 
 import {messages$} from 'messages';
 import {channels$} from 'channels';
-import {currentChannel$} from 'current-channel';
+import {currentChannels$} from 'current-channel';
 import {notifications$} from 'channel-notifications';
 
 const appState$ = Bacon.combineTemplate({
   channels: channels$,
   messages: messages$,
-  currentChannel: currentChannel$,
+  currentChannels: currentChannels$,
   notifications: notifications$
 });
 

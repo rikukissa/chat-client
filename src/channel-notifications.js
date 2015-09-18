@@ -1,15 +1,15 @@
 import Bacon from 'baconjs';
 import {findWhere} from 'lodash';
 import {message$} from 'messages';
-import {currentChannel$, selectChannel$} from 'current-channel';
+import {currentChannels$} from 'current-channel';
 
 export const notifications$ = Bacon.update([],
-  [message$, currentChannel$], notify,
-  [selectChannel$], removeNotifications,
+  [message$, currentChannels$], notify,
+  [currentChannels$.toEventStream()], removeNotifications,
 );
 
-function notify(notifications, message, currentChannel) {
-  if(currentChannel && message.channel === currentChannel.name) {
+function notify(notifications, message, currentChannels) {
+  if(findWhere(currentChannels, {name: message.channel})) {
     return notifications;
   }
 
@@ -31,8 +31,10 @@ function notify(notifications, message, currentChannel) {
   });
 }
 
-function removeNotifications(notifications, currentChannel) {
+function removeNotifications(notifications, currentChannels) {
   return notifications
-    .filter(notification => notification.channelName !== currentChannel.name);
+  .filter(notification => findWhere(currentChannels, {
+    name: notification.channelName
+  }));
 }
 

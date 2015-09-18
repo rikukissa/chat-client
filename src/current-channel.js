@@ -1,21 +1,50 @@
 import Bacon from 'baconjs';
 import {createChannel$} from 'channels';
+import {without} from 'lodash';
 
 
+export const toggleChannel$ = new Bacon.Bus();
 export const selectChannel$ = new Bacon.Bus();
 
-selectChannel$.onValue(chan => window.localStorage.setItem('current-channel', chan.name));
+function getStoredChannels() {
+  return JSON.parse(window.localStorage.getItem('current-channels'));
+}
 
-export const currentChannel$ = Bacon.update(null,
-  [selectChannel$], (state, channel) => channel,
-  [createChannel$], (state, channel) => {
-    if(channel.name === window.localStorage.getItem('current-channel')) {
-      return channel;
+export const currentChannels$ = Bacon.update([],
+  [toggleChannel$], toggle,
+  [selectChannel$], select,
+
+  [createChannel$], (channels, channel) => {
+    if(getStoredChannels().indexOf(channel) > -1) {
+      return channels.concat(channel);
     }
-    return state || channel;
+    return [channel];
   }
 );
+
+currentChannels$.onValue(channels => {
+  window.localStorage.setItem(
+    'current-channels',
+    JSON.stringify(channels.map(channel => channel))
+  );
+});
+
+function select(channels, channel) {
+  return [channel];
+}
+
+function toggle(channels, channel) {
+  if(channels.indexOf(channel) > -1) {
+    return without(channels, channel);
+  }
+  return channels.concat(channel);
+}
 
 export function selectChannel(channel) {
   selectChannel$.push(channel);
 }
+
+export function toggleChannel(channel) {
+  toggleChannel$.push(channel);
+}
+
