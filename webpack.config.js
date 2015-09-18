@@ -49,7 +49,7 @@ module.exports = {
     loaders: [
       {
         test: /\.jsx?$/,
-        loaders: ['react-hot', 'babel?stage=0'],
+        loaders: ['react-hot', 'babel?stage=0&optional[]=runtime'],
         include: path.join(__dirname, 'src')
       },
       {

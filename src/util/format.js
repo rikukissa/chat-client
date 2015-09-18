@@ -1,9 +1,11 @@
 import marked from 'marked';
 import highlight from 'highlight.js';
+import {decode} from 'he';
 import urlRegex from 'url-regex';
 import sanitizeHTML from 'sanitize-html';
 import {last} from 'lodash';
-import axios from 'axios';
+import composeAsync from 'compose-async';
+import * as imgur from 'services/imgur';
 
 marked.setOptions({
   highlight: code => highlight.highlightAuto(code).value,
@@ -20,15 +22,42 @@ function isImage(url) {
 }
 
 export function sanitize(text) {
-  return sanitizeHTML(text, {
-    allowedTags: ['iframe', 'p', 'code', 'span', 'pre', 'a', 'br', 'img'],
-    allowedAttributes: {
-      iframe: ['*'],
-      a: ['href'],
-      img: ['src'],
-      span: ['class']
+  return sanitizeHTML(text);
+}
+
+// Decodes encoded HTML entities inside <pre> tags
+export function decodeHE(html) {
+  return html.replace(
+    /<code>([\s\S]*)<\/code>/gm,
+    (_, match) => `<code>${decode(match)}</code>`
+  );
+}
+
+function createImageMarkdown(text, urls) {
+
+  return urls.reduce((memo, url) => {
+
+    if(!isImage(url)) {
+      return {
+        ...memo,
+        position: memo.text.indexOf(url) + url.length
+      };
     }
-  });
+
+    const replacer = `![${url}](${url})`;
+
+    const previousText = memo.text.slice(0, memo.position);
+    const remainingText = memo.text.slice(memo.position);
+
+    return {
+      text: previousText + remainingText.replace(url, replacer),
+      position: previousText.length + remainingText.indexOf(url) + replacer.length
+    };
+
+  }, {
+    text,
+    position: 0
+  }).text;
 }
 
 export function thumbnail(text) {
@@ -39,18 +68,16 @@ export function thumbnail(text) {
     return text;
   }
 
-  return matches.reduce((memo, url) => {
-    if(!isImage(url)) {
-      return memo;
-    }
-
-    return memo.replace(url, `![${url}](${url})`);
-  }, text);
-
+  return createImageMarkdown(text, matches);
 }
 
+export function nl2br(text) {
+  return text.replace(/\n/g, (match, place) => {
+    return place + 1 === text.length ? '' : '<br />';
+  });
+}
 
-export function embed(text) {
+function defaultEmbeds(text) {
   return text
   .replace(// Spotify
     /http:\/\/open\.spotify\.com\/track\/(\S+)/g,
@@ -59,18 +86,10 @@ export function embed(text) {
   .replace(// Youtube
     /https?:\/\/(www\.)?youtube\.com\/watch\?v=(\S+)/g,
     '<iframe id="ytplayer" type="text/html" width="640" height="390" src="http://www.youtube.com/embed/$2?autoplay=0" frameborder="0"></iframe>')
-
 }
 
-
-export function nl2br(text) {
-  return text.replace(/\n/g, (match, place) => {
-    return place + 1 === text.length ? '' : '<br />';
-  });
-}
-
-export function imgurEmbed(text) {
-  const regex = /http:\/\/imgur\.com\/gallery\/\S+/g;
+function imgurEmbeds(text) {
+  const regex = /https?:\/\/imgur\.com\/gallery\/\S+/g;
 
   const matches = text.match(regex);
 
@@ -82,13 +101,12 @@ export function imgurEmbed(text) {
     const id = last(url.split('/').filter(str => str !== ''));
 
     return promise.then((formatted) => {
-      return axios.get('https://api.imgur.com/3/gallery/' + id).then((res) => {
-        if(res.data.data.is_album) {
-          return formatted.replace(url, `<iframe class="imgur-album" width="100%" height="550" frameborder="0" src="https://imgur.com/a/${id}/embed"></iframe>`);
-        }
-        return formatted.replace(url, res.data.data.link);
-      });
+      return imgur.getEmbed(id).then(html =>
+        formatted.split(url).join(html)
+      ).catch(() => formatted);
     });
 
   }, Promise.resolve(text));
 }
+
+export const embed = composeAsync(defaultEmbeds, imgurEmbeds);

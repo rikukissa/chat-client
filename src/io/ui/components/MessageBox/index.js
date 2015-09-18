@@ -1,7 +1,7 @@
 import React from 'react';
 import timeago from 'timeago';
+import {sortBy} from 'lodash';
 import MessageGroup from 'io/ui/components/MessageGroup';
-
 import './index.styl';
 
 function groupSequentialMessagesByUser(messages) {
@@ -33,8 +33,8 @@ export default class MessageBox extends React.Component {
     node.scrollTop = node.scrollHeight;
   }
   render() {
-
-    const messageGroups = groupSequentialMessagesByUser(this.props.messages).slice(-10);
+    const sortedMessages = sortBy(this.props.messages, 'received');
+    const messageGroups = groupSequentialMessagesByUser(sortedMessages).slice(-10);
 
     return (
       <div className='message-box' ref='messages'>

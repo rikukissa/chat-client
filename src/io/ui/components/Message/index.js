@@ -1,30 +1,30 @@
 import React from 'react';
 import classNames from 'classnames';
-import {
-  nl2br,
-  sanitize,
-  embed,
-  markdown,
-  thumbnail,
-  imgurEmbed
-} from 'util/format';
-
-import {compose} from 'lodash';
+import {sanitize} from 'util/format';
 
 import './index.styl';
-
-const format = compose(sanitize, nl2br, markdown, thumbnail, embed);
-const formatAsync = (text) => imgurEmbed(text);
 
 const Message = React.createClass({
   getInitialState() {
     return {
-      asyncFormatted: null
+      text: ''
     };
   },
   componentDidMount() {
-    formatAsync(this.props.text)
-    .then(asyncFormatted => this.setState({asyncFormatted}));
+    this.format(this.props.text);
+  },
+  componentWillReceiveProps(nextProps) {
+    this.format(nextProps.text);
+  },
+  shouldComponentUpdate(nextProps, nextState) {
+    return nextState.text !== this.state.text;
+  },
+  format(text) {
+    const sanitized = sanitize(text);
+    this.setState({text: sanitized});
+
+    this.props.formatter(sanitized)
+      .then(formatted => this.setState({text: formatted}));
   },
   render() {
     const classes = classNames(this.props.className, 'message');
@@ -34,7 +34,7 @@ const Message = React.createClass({
         <div
           className='message__body markdown-body'
           dangerouslySetInnerHTML={{
-            __html: format(this.state.asyncFormatted || this.props.text)
+            __html: this.state.text
           }}></div>
       </div>
     );
