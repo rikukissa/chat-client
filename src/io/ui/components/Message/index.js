@@ -19,6 +19,19 @@ const Message = React.createClass({
   shouldComponentUpdate(nextProps, nextState) {
     return nextState.text !== this.state.text;
   },
+  componentDidUpdate() {
+    this.getImages().forEach(image => {
+      image.addEventListener('load', this.props.imageLoaded);
+    });
+  },
+  componentWillUnmount() {
+    this.getImages().forEach(image => {
+      image.removeEventListener('load', this.props.imageLoaded);
+    });
+  },
+  getImages() {
+    return Array.from(React.findDOMNode(this).getElementsByTagName('img'));
+  },
   format(text) {
     const sanitized = sanitize(text);
     this.setState({text: sanitized});

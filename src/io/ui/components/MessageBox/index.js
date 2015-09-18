@@ -20,18 +20,30 @@ function groupSequentialMessagesByUser(messages) {
   }, []);
 }
 
-export default class MessageBox extends React.Component {
+const MessageBox = React.createClass({
+  componentDidMount() {
+
+  },
   componentWillUpdate() {
     const node = React.findDOMNode(this.refs.messages);
     this.shouldScrollBottom = (node.scrollTop + node.offsetHeight) > (node.scrollHeight - 50);
-  }
-  componentDidUpdate() {
-    if(!this.shouldScrollBottom) {
-      return;
+  },
+  componentDidUpdate(prevProps) {
+    const channelsChanged = prevProps.currentChannels !== this.props.currentChannels;
+
+    if(this.shouldScrollBottom || channelsChanged) {
+      setTimeout(this.scrollToBottom);
     }
+  },
+  imageLoaded() {
+    if(this.shouldScrollBottom) {
+      this.scrollToBottom();
+    }
+  },
+  scrollToBottom() {
     const node = React.findDOMNode(this.refs.messages);
     node.scrollTop = node.scrollHeight;
-  }
+  },
   render() {
     const sortedMessages = sortBy(this.props.messages, 'received');
     const messageGroups = groupSequentialMessagesByUser(sortedMessages).slice(-10);
@@ -55,10 +67,16 @@ export default class MessageBox extends React.Component {
               </div>
             )];
 
-            return block.concat(<MessageGroup key={messageGroup[0].id} messages={messageGroup} />);
+            return block.concat(
+              <MessageGroup
+                key={messageGroup[0].id}
+                imageLoaded={this.imageLoaded}
+                messages={messageGroup} />);
           })
         }
       </div>
     );
   }
-}
+});
+
+export default MessageBox;

@@ -16,6 +16,8 @@
   ],
   "dependencies": {
     "axios": "^0.5.4",
+    "babel": "^5.8.23",
+    "babel-runtime": "^5.8.20",
     "baconjs": "^0.7.71",
     "bluebird": "^2.9.34",
     "chance": "^0.7.6",

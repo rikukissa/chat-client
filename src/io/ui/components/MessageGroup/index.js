@@ -36,6 +36,7 @@ export default class MessageGroup extends React.Component {
             </span>
           </div>
           <Message
+            imageLoaded={this.props.imageLoaded}
             text={this.props.messages.map(m => m.body).join('\n')}
             formatter={motd ? MOTDFormatter : defaultFormatter} />
         </div>
