@@ -34,6 +34,7 @@
     "ramda": "^0.17.1",
     "react": "^0.13.3",
     "react-textarea-autosize": "^2.5.1",
+    "routes": "^2.1.0",
     "sanitize-html": "^1.9.0",
     "timeago": "^0.2.0",
     "url-regex": "^3.0.0"

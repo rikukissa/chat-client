@@ -4,6 +4,7 @@ import Bacon from 'baconjs';
 import {
   // Incoming channels
   part$,
+  join$,
   // Outgoing channels
   createChannel,
   removeChannel
@@ -52,6 +53,8 @@ export default function init() {
     client.say(channel, body);
     addMessage({channel, body, nick});
   });
+
+  join$.onValue(::client.join);
 
   // getChannels$.delay(500).onValue(() => {
   //   CHANNELS.map(createChannel);

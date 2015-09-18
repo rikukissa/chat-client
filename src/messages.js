@@ -1,6 +1,9 @@
 import Bacon from 'baconjs';
-import {currentChannel$} from 'current-channel';
+import Router from 'routes';
 import PouchDB from 'pouchdb';
+
+import {joinChannel} from 'channels';
+import {currentChannels$} from 'current-channel';
 
 const db = new PouchDB('messages');
 
@@ -35,6 +38,42 @@ message$.onValue((message) => {
   db.post(message);
 });
 
+function create(messages, message) {
+  return messages.concat(message);
+}
+
+// Router for handling user commands like /join
+const messageRouter = Router();
+
+messageRouter.addRoute('/join :channel', function({channel}) {
+  joinChannel(channel);
+});
+
+function sendMessage(body) {
+
+  const match = messageRouter.match(body);
+
+  if(match) {
+    return match.fn(match.params);
+  }
+
+  currentChannels$.sampledBy(Bacon.once())
+  .filter(channels => channels.length > 0)
+  .map(channels => ({
+    channel: channels[0],
+    body,
+    nick: 'Riku'
+  })).onValue(::sendMessage$.push);
+
+  currentChannels$.sampledBy(Bacon.once())
+  .filter(channels => channels.length === 0)
+  .map(channels => ({
+    body: 'No channel selected',
+    type: 'error'
+  }))
+  .onValue(addMessage);
+}
+
 /*
  * Public store API
  */
@@ -44,22 +83,11 @@ export const messages$ = Bacon.update([],
   [load$], (messages, loaded) => loaded
 );
 
-function create(messages, message) {
-  return messages.concat(message);
-}
-
 /*
  * Public API
  */
 
-export function sendMessage(body) {
-  currentChannel$.sampledBy(Bacon.once()).map(channel => ({
-    channel: channel.name,
-    body,
-    nick: 'Riku'
-  })).onValue(::sendMessage$.push);
-}
-
+export {sendMessage as sendMessage};
 export function addMessage(message) {
   addMessage$.push(message);
 }

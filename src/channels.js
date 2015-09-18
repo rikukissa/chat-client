@@ -11,6 +11,7 @@ import {without} from 'lodash';
 
 export const getChannels$ = new Bacon.Bus();
 export const part$ = new Bacon.Bus();
+export const join$ = new Bacon.Bus();
 
 /*
  * Incoming
@@ -49,6 +50,10 @@ function remove(channels, channel) {
 /*
  * Public API used by IOs
  */
+
+export function joinChannel(channelName) {
+  join$.push(channelName);
+}
 
 export function partChannel(channel) {
   // Optimistic removal
