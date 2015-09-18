@@ -39,6 +39,11 @@ export default function init() {
     .map('.channel')
     .onValue(createChannel);
 
+
+  Bacon.fromEvent(client, 'motd', (body) => {
+    return {body, motd: true};
+  }).onValue(addMessage);
+
   Bacon.fromEvent(client, 'message', (nick, channel, body, event) => {
     return {nick, channel, body, prefix: event.prefix};
   })
